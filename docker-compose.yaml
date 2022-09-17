@@ -1,0 +1,54 @@
+version: "3"
+services:
+  
+  client:
+   build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+   ports:
+    -  8080:8080
+   container_name: mevn-client
+   networks:
+    -  mevn-stack-net
+   volumes:
+    -  ./client/src:/usr/app/src
+    -  ./client/public:/usr/app/public
+   depends_on:
+    - server
+   stdin_open: true
+   tty: true
+
+  server:
+   build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+   ports:
+     - 3080:3080
+   container_name: mevn-server
+   networks:
+     - mevn-stack-net
+   volumes:
+    - ./server/src:/usr/app/src
+   depends_on:
+    - db
+   environment:
+    - NODE_PATH=/usr/app/node_modules
+  
+
+  db:
+    image: mongo
+    ports:
+      - 27017:27017
+    container_name: mongo-db
+    networks:
+      - mevn-stack-net
+    volumes:
+      - mongo-data:/data/db
+
+networks:
+  mevn-stack-net:
+    driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local
